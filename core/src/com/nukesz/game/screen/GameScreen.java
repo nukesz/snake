@@ -1,4 +1,4 @@
-package com.nukesz.game;
+package com.nukesz.game.screen;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -14,6 +14,10 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.nukesz.game.BodyPart;
+import com.nukesz.game.SnakeGame;
+import com.nukesz.game.State;
+import com.nukesz.game.Wall;
 
 import java.awt.*;
 

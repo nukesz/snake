@@ -1,4 +1,4 @@
-package com.nukesz.game;
+package com.nukesz.game.screen;
 
 import com.badlogic.gdx.ScreenAdapter;
 import com.nukesz.game.SnakeGame;
