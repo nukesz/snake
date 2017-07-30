@@ -30,14 +30,12 @@ public class GameScreen extends ScreenAdapter {
     private static final int LEFT = 1;
     private static final int UP = 2;
     private static final int DOWN = 3;
-    private int snakeDirection = UP;
-
-    private Viewport viewport;
-    private Camera camera;
-
     private static final float MOVE_TIME = 0.2F;
     private static final int SNAKE_MOVEMENT = 32;
     private static final int GRID_CELL = 32;
+    private int snakeDirection = UP;
+    private Viewport viewport;
+    private Camera camera;
     private float timer = MOVE_TIME;
     private int snakeX = 0;
     private int snakeY = 0;
@@ -76,13 +74,13 @@ public class GameScreen extends ScreenAdapter {
         apple = new Texture(Gdx.files.internal("apple.png"));
         wall = new Texture(Gdx.files.internal("wall.png"));
         walls = new Array<Wall>();
-        for (int i = 4 * GRID_CELL; i < 10 * GRID_CELL; i+= GRID_CELL) {
+        for (int i = 4 * GRID_CELL; i < 10 * GRID_CELL; i += GRID_CELL) {
             walls.add(new Wall(wall, i, 10 * GRID_CELL));
         }
     }
 
     @Override
-    public void resize(int width, int height){
+    public void resize(int width, int height) {
         viewport.update(width, height);
         camera.position.set(camera.viewportWidth / 2, camera.viewportHeight / 2, 0);
     }
@@ -92,7 +90,7 @@ public class GameScreen extends ScreenAdapter {
         switch (state) {
 
             case INITIAL:
-                checkForRestart();
+                checkForInit();
                 break;
             case PLAYING:
                 queryInput();
@@ -101,7 +99,7 @@ public class GameScreen extends ScreenAdapter {
                 checkAndPlaceApple();
                 break;
             case GAME_OVER:
-                checkForRestart();
+                checkForInit();
                 break;
         }
         clearScreen();
@@ -147,20 +145,26 @@ public class GameScreen extends ScreenAdapter {
         if (appleAvailable) {
             batch.draw(apple, appleX, appleY);
         }
-        if (state == State.GAME_OVER) {
-            layout.setText(bitmapFont, GAME_OVER_TEXT);
-            bitmapFont.draw(batch, GAME_OVER_TEXT, (viewport.getWorldWidth() -
-                    layout.width) / 2, (viewport.getWorldHeight() - layout.height) / 2);
-
-        }
-        if (state == State.INITIAL) {
-            layout.setText(bitmapFont, GAME_START_TEXT);
-            bitmapFont.draw(batch, GAME_START_TEXT, (viewport.getWorldWidth() -
-                    layout.width) / 2, (viewport.getWorldHeight() - layout.height) / 2);
-
-        }
+        printState(state);
         drawScore();
         batch.end();
+    }
+
+    private void printState(State state) {
+        switch (state) {
+            case INITIAL:
+                printToMiddleScreen(GAME_START_TEXT);
+                break;
+            case GAME_OVER:
+                printToMiddleScreen(GAME_OVER_TEXT);
+                break;
+        }
+    }
+
+    private void printToMiddleScreen(String message) {
+        layout.setText(bitmapFont, message);
+        bitmapFont.draw(batch, message, (viewport.getWorldWidth() -
+                layout.width) / 2, (viewport.getWorldHeight() - layout.height) / 2);
     }
 
     private void clearScreen() {
@@ -234,10 +238,10 @@ public class GameScreen extends ScreenAdapter {
     }
 
     private void queryInput() {
-        boolean lPressed = Gdx.input.isKeyPressed(Input.Keys.LEFT)||Gdx.input.isKeyPressed(Input.Keys.A);
-        boolean rPressed = Gdx.input.isKeyPressed(Input.Keys.RIGHT)||Gdx.input.isKeyPressed(Input.Keys.D);
-        boolean uPressed = Gdx.input.isKeyPressed(Input.Keys.UP)||Gdx.input.isKeyPressed(Input.Keys.W);
-        boolean dPressed = Gdx.input.isKeyPressed(Input.Keys.DOWN)||Gdx.input.isKeyPressed(Input.Keys.S);
+        boolean lPressed = Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A);
+        boolean rPressed = Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D);
+        boolean uPressed = Gdx.input.isKeyPressed(Input.Keys.UP) || Gdx.input.isKeyPressed(Input.Keys.W);
+        boolean dPressed = Gdx.input.isKeyPressed(Input.Keys.DOWN) || Gdx.input.isKeyPressed(Input.Keys.S);
 
         if (lPressed) updateDirection(LEFT);
         if (rPressed) updateDirection(RIGHT);
@@ -277,19 +281,20 @@ public class GameScreen extends ScreenAdapter {
                 state = State.GAME_OVER;
             }
         }
-        for (Wall wall: walls) {
+        for (Wall wall : walls) {
             if (wall.x == snakeX && wall.y == snakeY) {
                 state = State.GAME_OVER;
             }
         }
     }
 
-    private void checkForRestart() {
+    private void checkForInit() {
         if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
-            doRestart();
+            doInit();
         }
     }
-    private void doRestart() {
+
+    private void doInit() {
         state = State.PLAYING;
         bodyParts.clear();
         snakeDirection = RIGHT;
