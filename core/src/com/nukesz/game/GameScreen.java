@@ -2,7 +2,6 @@ package com.nukesz.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -18,7 +17,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 
 import java.awt.*;
 
-public class GameScreen extends ScreenAdapter {
+public class GameScreen extends AbstractGameScreen {
 
     private static final float WORLD_WIDTH = 640;
     private static final float WORLD_HEIGHT = 480;
@@ -58,6 +57,10 @@ public class GameScreen extends ScreenAdapter {
     private State state = State.INITIAL;
     private int score = 0;
     private Array<Wall> walls;
+
+    public GameScreen(SnakeGame game) {
+        super(game);
+    }
 
     @Override
     public void show() {
