@@ -1,5 +1,5 @@
 package com.nukesz.game;
 
 public enum State {
-    PLAYING, GAME_OVER
+    INITIAL, PLAYING, GAME_OVER
 }

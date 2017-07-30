@@ -23,6 +23,7 @@ public class GameScreen extends ScreenAdapter {
     private static final float WORLD_WIDTH = 640;
     private static final float WORLD_HEIGHT = 480;
     private static final String GAME_OVER_TEXT = "Game Over... Tap space to restart!";
+    private static final String GAME_START_TEXT = "Welcome to the SNAKE game! Tap space to start!";
     private static final int POINTS_PER_APPLE = 10;
 
     private static final int RIGHT = 0;
@@ -56,7 +57,7 @@ public class GameScreen extends ScreenAdapter {
     private int snakeXBeforeUpdate;
     private int snakeYBeforeUpdate;
     private boolean directionSet = false;
-    private State state = State.PLAYING;
+    private State state = State.INITIAL;
     private int score = 0;
     private Array<Wall> walls;
 
@@ -89,6 +90,10 @@ public class GameScreen extends ScreenAdapter {
     @Override
     public void render(float delta) {
         switch (state) {
+
+            case INITIAL:
+                checkForRestart();
+                break;
             case PLAYING:
                 queryInput();
                 updateSnake(delta);
@@ -145,6 +150,12 @@ public class GameScreen extends ScreenAdapter {
         if (state == State.GAME_OVER) {
             layout.setText(bitmapFont, GAME_OVER_TEXT);
             bitmapFont.draw(batch, GAME_OVER_TEXT, (viewport.getWorldWidth() -
+                    layout.width) / 2, (viewport.getWorldHeight() - layout.height) / 2);
+
+        }
+        if (state == State.INITIAL) {
+            layout.setText(bitmapFont, GAME_START_TEXT);
+            bitmapFont.draw(batch, GAME_START_TEXT, (viewport.getWorldWidth() -
                     layout.width) / 2, (viewport.getWorldHeight() - layout.height) / 2);
 
         }
@@ -223,10 +234,11 @@ public class GameScreen extends ScreenAdapter {
     }
 
     private void queryInput() {
-        boolean lPressed = Gdx.input.isKeyPressed(Input.Keys.LEFT);
-        boolean rPressed = Gdx.input.isKeyPressed(Input.Keys.RIGHT);
-        boolean uPressed = Gdx.input.isKeyPressed(Input.Keys.UP);
-        boolean dPressed = Gdx.input.isKeyPressed(Input.Keys.DOWN);
+        boolean lPressed = Gdx.input.isKeyPressed(Input.Keys.LEFT)||Gdx.input.isKeyPressed(Input.Keys.A);
+        boolean rPressed = Gdx.input.isKeyPressed(Input.Keys.RIGHT)||Gdx.input.isKeyPressed(Input.Keys.D);
+        boolean uPressed = Gdx.input.isKeyPressed(Input.Keys.UP)||Gdx.input.isKeyPressed(Input.Keys.W);
+        boolean dPressed = Gdx.input.isKeyPressed(Input.Keys.DOWN)||Gdx.input.isKeyPressed(Input.Keys.S);
+
         if (lPressed) updateDirection(LEFT);
         if (rPressed) updateDirection(RIGHT);
         if (uPressed) updateDirection(UP);
