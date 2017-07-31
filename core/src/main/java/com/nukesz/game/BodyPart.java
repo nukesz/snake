@@ -3,21 +3,22 @@ package com.nukesz.game;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 
-public class BodyPart extends Item{
+public class BodyPart extends Item {
 
 
     public BodyPart(Texture texture) {
-        super(0,0,texture);
+        super(0, 0, texture);
     }
 
     public BodyPart(int x, int y) {
-        super(x,y,null);
+        super(x, y, null);
     }
 
     public void updateBodyPosition(int x, int y) {
         this.x = x;
         this.y = y;
     }
+
     public int getX() {
         return x;
     }
@@ -31,8 +32,6 @@ public class BodyPart extends Item{
             batch.draw(texture, x, y);
         }
     }
-
-
 
 
 }

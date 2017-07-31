@@ -76,13 +76,13 @@ public class GameScreen extends ScreenAdapter {
         apple = new Texture(Gdx.files.internal("apple.png"));
         wall = new Texture(Gdx.files.internal("wall.png"));
         walls = new Array<>();
-        for (int i = 4 * GRID_CELL; i < 10 * GRID_CELL; i+= GRID_CELL) {
+        for (int i = 4 * GRID_CELL; i < 10 * GRID_CELL; i += GRID_CELL) {
             walls.add(new Wall(wall, i, 10 * GRID_CELL));
         }
     }
 
     @Override
-    public void resize(int width, int height){
+    public void resize(int width, int height) {
         viewport.update(width, height);
         camera.position.set(camera.viewportWidth / 2, camera.viewportHeight / 2, 0);
     }
@@ -234,10 +234,10 @@ public class GameScreen extends ScreenAdapter {
     }
 
     private void queryInput() {
-        boolean lPressed = Gdx.input.isKeyPressed(Input.Keys.LEFT)||Gdx.input.isKeyPressed(Input.Keys.A);
-        boolean rPressed = Gdx.input.isKeyPressed(Input.Keys.RIGHT)||Gdx.input.isKeyPressed(Input.Keys.D);
-        boolean uPressed = Gdx.input.isKeyPressed(Input.Keys.UP)||Gdx.input.isKeyPressed(Input.Keys.W);
-        boolean dPressed = Gdx.input.isKeyPressed(Input.Keys.DOWN)||Gdx.input.isKeyPressed(Input.Keys.S);
+        boolean lPressed = Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A);
+        boolean rPressed = Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D);
+        boolean uPressed = Gdx.input.isKeyPressed(Input.Keys.UP) || Gdx.input.isKeyPressed(Input.Keys.W);
+        boolean dPressed = Gdx.input.isKeyPressed(Input.Keys.DOWN) || Gdx.input.isKeyPressed(Input.Keys.S);
 
         if (lPressed) updateDirection(LEFT);
         if (rPressed) updateDirection(RIGHT);
@@ -277,7 +277,7 @@ public class GameScreen extends ScreenAdapter {
                 state = State.GAME_OVER;
             }
         }
-        for (Wall wall: walls) {
+        for (Wall wall : walls) {
             if (wall.x == snakeX && wall.y == snakeY) {
                 state = State.GAME_OVER;
             }
@@ -289,6 +289,7 @@ public class GameScreen extends ScreenAdapter {
             doRestart();
         }
     }
+
     private void doRestart() {
         state = State.PLAYING;
         bodyParts.clear();
