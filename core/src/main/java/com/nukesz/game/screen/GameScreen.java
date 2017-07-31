@@ -289,7 +289,7 @@ public class GameScreen extends AbstractGameScreen {
             }
         }
         for (Wall wall : walls) {
-            if (wall.x == snakeX && wall.y == snakeY) {
+            if (wall.getX() == snakeX && wall.getY() == snakeY) {
                 state = State.GAME_OVER;
             }
         }
