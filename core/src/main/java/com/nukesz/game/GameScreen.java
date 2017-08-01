@@ -273,7 +273,7 @@ public class GameScreen extends ScreenAdapter {
 
     private void checkSnakeBodyCollision() {
         for (BodyPart bodyPart : bodyParts) {
-            if (bodyPart.getX() == snakeX && bodyPart.getY() == snakeY) {
+            if (bodyPart.x == snakeX && bodyPart.y == snakeY) {
                 state = State.GAME_OVER;
             }
         }

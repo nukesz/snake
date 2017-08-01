@@ -9,6 +9,7 @@ sourceSets.test.java.srcDirs = ["src/test/java"]
 eclipse.project {
     name = appName + "-core"
 }
+
 dependencies {
     testCompile 'junit:junit:4.12'
 }
