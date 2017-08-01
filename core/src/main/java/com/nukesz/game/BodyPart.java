@@ -3,7 +3,7 @@ package com.nukesz.game;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 
-public class BodyPart extends Item {
+public class BodyPart extends AbstractGameObject {
 
 
     public BodyPart(Texture texture) {
@@ -19,13 +19,6 @@ public class BodyPart extends Item {
         this.y = y;
     }
 
-    public int getX() {
-        return x;
-    }
-
-    public int getY() {
-        return y;
-    }
 
     public void draw(Batch batch, int snakeX, int snakeY) {
         if (x != snakeX || y != snakeY) {

@@ -6,11 +6,9 @@ public class BodyPartTest {
 
     @Test
     public void test() {
-        //GIVEN
         BodyPart bp = new BodyPart(21, 2);
 
-        //WHEN/THEN
-        Assert.assertEquals(21, bp.getX());
-        Assert.assertEquals(2, bp.getY());
+        Assert.assertEquals(21, bp.x);
+        Assert.assertEquals(2, bp.y);
     }
 }

@@ -284,12 +284,12 @@ public class GameScreen extends AbstractGameScreen {
 
     private void checkSnakeBodyCollision() {
         for (BodyPart bodyPart : bodyParts) {
-            if (bodyPart.getX() == snakeX && bodyPart.getY() == snakeY) {
+            if (bodyPart.x == snakeX && bodyPart.y == snakeY) {
                 state = State.GAME_OVER;
             }
         }
         for (Wall wall : walls) {
-            if (wall.getX() == snakeX && wall.getY() == snakeY) {
+            if (wall.x == snakeX && wall.y == snakeY) {
                 state = State.GAME_OVER;
             }
         }
