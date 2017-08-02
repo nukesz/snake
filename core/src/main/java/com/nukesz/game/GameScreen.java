@@ -1,7 +1,8 @@
-package com.nukesz.game.screen;
+package com.nukesz.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -14,14 +15,10 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.nukesz.game.BodyPart;
-import com.nukesz.game.SnakeGame;
-import com.nukesz.game.State;
-import com.nukesz.game.Wall;
 
 import java.awt.*;
 
-public class GameScreen extends AbstractGameScreen {
+public class GameScreen extends ScreenAdapter {
 
     private static final float WORLD_WIDTH = 640;
     private static final float WORLD_HEIGHT = 480;
@@ -33,12 +30,14 @@ public class GameScreen extends AbstractGameScreen {
     private static final int LEFT = 1;
     private static final int UP = 2;
     private static final int DOWN = 3;
+    private int snakeDirection = UP;
+
+    private Viewport viewport;
+    private Camera camera;
+
     private static final float MOVE_TIME = 0.2F;
     private static final int SNAKE_MOVEMENT = 32;
     private static final int GRID_CELL = 32;
-    private int snakeDirection = UP;
-    private Viewport viewport;
-    private Camera camera;
     private float timer = MOVE_TIME;
     private int snakeX = 0;
     private int snakeY = 0;
@@ -54,17 +53,13 @@ public class GameScreen extends AbstractGameScreen {
     private boolean appleAvailable = false;
     private int appleX;
     private int appleY;
-    private Array<BodyPart> bodyParts = new Array<BodyPart>();
+    private Array<BodyPart> bodyParts = new Array<>();
     private int snakeXBeforeUpdate;
     private int snakeYBeforeUpdate;
     private boolean directionSet = false;
     private State state = State.INITIAL;
     private int score = 0;
     private Array<Wall> walls;
-
-    public GameScreen(SnakeGame game) {
-        super(game);
-    }
 
     @Override
     public void show() {
@@ -80,7 +75,7 @@ public class GameScreen extends AbstractGameScreen {
         snakeBody = new Texture(Gdx.files.internal("snakebody.png"));
         apple = new Texture(Gdx.files.internal("apple.png"));
         wall = new Texture(Gdx.files.internal("wall.png"));
-        walls = new Array<Wall>();
+        walls = new Array<>();
         for (int i = 4 * GRID_CELL; i < 10 * GRID_CELL; i += GRID_CELL) {
             walls.add(new Wall(wall, i, 10 * GRID_CELL));
         }
@@ -97,7 +92,7 @@ public class GameScreen extends AbstractGameScreen {
         switch (state) {
 
             case INITIAL:
-                checkForInit();
+                checkForRestart();
                 break;
             case PLAYING:
                 queryInput();
@@ -106,7 +101,7 @@ public class GameScreen extends AbstractGameScreen {
                 checkAndPlaceApple();
                 break;
             case GAME_OVER:
-                checkForInit();
+                checkForRestart();
                 break;
         }
         clearScreen();
@@ -152,26 +147,20 @@ public class GameScreen extends AbstractGameScreen {
         if (appleAvailable) {
             batch.draw(apple, appleX, appleY);
         }
-        printState(state);
+        if (state == State.GAME_OVER) {
+            layout.setText(bitmapFont, GAME_OVER_TEXT);
+            bitmapFont.draw(batch, GAME_OVER_TEXT, (viewport.getWorldWidth() -
+                    layout.width) / 2, (viewport.getWorldHeight() - layout.height) / 2);
+
+        }
+        if (state == State.INITIAL) {
+            layout.setText(bitmapFont, GAME_START_TEXT);
+            bitmapFont.draw(batch, GAME_START_TEXT, (viewport.getWorldWidth() -
+                    layout.width) / 2, (viewport.getWorldHeight() - layout.height) / 2);
+
+        }
         drawScore();
         batch.end();
-    }
-
-    private void printState(State state) {
-        switch (state) {
-            case INITIAL:
-                printToMiddleScreen(GAME_START_TEXT);
-                break;
-            case GAME_OVER:
-                printToMiddleScreen(GAME_OVER_TEXT);
-                break;
-        }
-    }
-
-    private void printToMiddleScreen(String message) {
-        layout.setText(bitmapFont, message);
-        bitmapFont.draw(batch, message, (viewport.getWorldWidth() -
-                layout.width) / 2, (viewport.getWorldHeight() - layout.height) / 2);
     }
 
     private void clearScreen() {
@@ -295,13 +284,13 @@ public class GameScreen extends AbstractGameScreen {
         }
     }
 
-    private void checkForInit() {
+    private void checkForRestart() {
         if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
-            doInit();
+            doRestart();
         }
     }
 
-    private void doInit() {
+    private void doRestart() {
         state = State.PLAYING;
         bodyParts.clear();
         snakeDirection = RIGHT;

@@ -3,16 +3,16 @@ package com.nukesz.game;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 
-public class Wall {
+public class AbstractGameObject {
 
     public int x;
     public int y;
-    private Texture texture;
+    protected Texture texture;
 
-    public Wall(Texture texture, int x, int y) {
-        this.texture = texture;
+    public AbstractGameObject(int x, int y, Texture texture) {
         this.x = x;
         this.y = y;
+        this.texture = texture;
     }
 
     public void draw(Batch batch) {
