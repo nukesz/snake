@@ -7,7 +7,7 @@ public class AbstractGameObject {
 
     public int x;
     public int y;
-    protected Texture texture;
+    public Texture texture;
 
     public AbstractGameObject(int x, int y, Texture texture) {
         this.x = x;
