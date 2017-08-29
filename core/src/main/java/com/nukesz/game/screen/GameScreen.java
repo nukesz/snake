@@ -51,11 +51,7 @@ public class GameScreen extends AbstractGameScreen {
     private GlyphLayout layout = new GlyphLayout();
     private Texture snakeHead;
     private Texture snakeBody;
-    //  private Texture apple;
     private Texture wall;
-    //private boolean appleAvailable = false;
-    // private int appleX;
-    // private int appleY;
     Apple appleObj;
     private Array<BodyPart> bodyParts = new Array<>();
     private int snakeXBeforeUpdate;
