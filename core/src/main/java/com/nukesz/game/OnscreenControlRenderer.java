@@ -9,7 +9,6 @@ public class OnscreenControlRenderer {
     SpriteBatch batch;
     TextureRegion left;
     TextureRegion right;
-    //Texture up;
     TextureRegion down;
     TextureRegion up;
 
@@ -27,7 +26,7 @@ public class OnscreenControlRenderer {
         right = buttons[0];
         up = buttons2[0];
         buttons2 = TextureRegion.split(texture2, 640, 30)[1];
-        down= buttons2[0];
+        down = buttons2[0];
         batch = new SpriteBatch();
     }
 
@@ -43,4 +42,5 @@ public class OnscreenControlRenderer {
     public void dispose() {
         batch.dispose();
     }
+
 }

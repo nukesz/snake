@@ -11,7 +11,6 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -31,20 +30,17 @@ public class GameScreen extends AbstractGameScreen {
     private static final String GAME_START_TEXT = "Welcome to the SNAKE game! Tap space to start!";
     private static final int POINTS_PER_APPLE = 10;
 
-    private static final int RIGHT = 0;
-    private static final int LEFT = 1;
-    private static final int UP = 2;
-    private static final int DOWN = 3;
+
     private static final float MOVE_TIME = 0.2F;
     private static final int SNAKE_MOVEMENT = 32;
-
-    private int snakeDirection = UP;
+    Apple appleObj;
+    OnscreenControlRenderer controlRenderer;
+    private Direction snakeDirection = Direction.UP;
     private Viewport viewport;
     private Camera camera;
     private float timer = MOVE_TIME;
     private int snakeX = 0;
     private int snakeY = 0;
-
     private SpriteBatch batch;
     private ShapeRenderer shapeRenderer;
     private BitmapFont bitmapFont;
@@ -52,7 +48,6 @@ public class GameScreen extends AbstractGameScreen {
     private Texture snakeHead;
     private Texture snakeBody;
     private Texture wall;
-    Apple appleObj;
     private Array<BodyPart> bodyParts = new Array<>();
     private int snakeXBeforeUpdate;
     private int snakeYBeforeUpdate;
@@ -60,8 +55,9 @@ public class GameScreen extends AbstractGameScreen {
     private State state = State.INITIAL;
     private int score = 0;
     private Array<Wall> walls;
-    OnscreenControlRenderer controlRenderer;
-    private boolean isSideControllerNeeded =true;
+    private boolean isSideControllerNeeded = true;
+    private InputHandler inputHandler;
+
     public GameScreen(SnakeGame game) {
         super(game);
         if (isSideControllerNeeded) {
@@ -88,7 +84,7 @@ public class GameScreen extends AbstractGameScreen {
         for (int i = 4 * GRID_CELL; i < 10 * GRID_CELL; i += GRID_CELL) {
             walls.add(new Wall(wall, i, 10 * GRID_CELL));
         }
-
+        inputHandler = new InputHandler(WORLD_WIDTH, WORLD_HEIGHT);
     }
 
     @Override
@@ -115,7 +111,7 @@ public class GameScreen extends AbstractGameScreen {
                 break;
         }
         clearScreen();
-        //drawGrid();
+        //    drawGrid();
         draw();
         controlRenderer.render();
     }
@@ -257,54 +253,40 @@ public class GameScreen extends AbstractGameScreen {
         boolean rPressed = Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D);
         boolean uPressed = Gdx.input.isKeyPressed(Input.Keys.UP) || Gdx.input.isKeyPressed(Input.Keys.W);
         boolean dPressed = Gdx.input.isKeyPressed(Input.Keys.DOWN) || Gdx.input.isKeyPressed(Input.Keys.S);
-        if (isSideControllerNeeded) {
-            if(Gdx.input.isTouched()) {
-                Vector3 touchPos = new Vector3();
-                touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-                camera.unproject(touchPos);
-                if (touchPos.x<32&&touchPos.x>0){
-                    lPressed=true;
-                }
-                if (touchPos.x<WORLD_WIDTH&&touchPos.x>WORLD_WIDTH-32){
-                    rPressed=true;
-                }
-                if (touchPos.y<32&&touchPos.y>0){
-                    dPressed=true;
-                }
-                if (touchPos.y<WORLD_HEIGHT&&touchPos.y>WORLD_HEIGHT-32){
-                    uPressed=true;
-                }
-            }
+
+        Direction way= inputHandler.handleMouseClick(camera);
+        if (way!=Direction.NONE){
+            updateDirection(way);
         }
-        if (lPressed) updateDirection(LEFT);
-        if (rPressed) updateDirection(RIGHT);
-        if (uPressed) updateDirection(UP);
-        if (dPressed) updateDirection(DOWN);
+        if (lPressed) updateDirection(Direction.LEFT);
+        if (rPressed) updateDirection(Direction.RIGHT);
+        if (uPressed) updateDirection(Direction.UP);
+        if (dPressed) updateDirection(Direction.DOWN);
 
 
     }
 
-    private void updateIfNotOppositeDirection(int newSnakeDirection, int oppositeDirection) {
+    private void updateIfNotOppositeDirection(Direction newSnakeDirection, Direction oppositeDirection) {
         if (snakeDirection != oppositeDirection || bodyParts.size == 0) {
             snakeDirection = newSnakeDirection;
         }
     }
 
-    private void updateDirection(int newSnakeDirection) {
+    private void updateDirection(Direction newSnakeDirection) {
         if (!directionSet && snakeDirection != newSnakeDirection) {
             directionSet = true;
             switch (newSnakeDirection) {
                 case LEFT:
-                    updateIfNotOppositeDirection(newSnakeDirection, RIGHT);
+                    updateIfNotOppositeDirection(newSnakeDirection, Direction.RIGHT);
                     break;
                 case RIGHT:
-                    updateIfNotOppositeDirection(newSnakeDirection, LEFT);
+                    updateIfNotOppositeDirection(newSnakeDirection, Direction.LEFT);
                     break;
                 case UP:
-                    updateIfNotOppositeDirection(newSnakeDirection, DOWN);
+                    updateIfNotOppositeDirection(newSnakeDirection, Direction.DOWN);
                     break;
                 case DOWN:
-                    updateIfNotOppositeDirection(newSnakeDirection, UP);
+                    updateIfNotOppositeDirection(newSnakeDirection, Direction.UP);
                     break;
             }
         }
@@ -334,7 +316,7 @@ public class GameScreen extends AbstractGameScreen {
     private void doInit() {
         state = State.PLAYING;
         bodyParts.clear();
-        snakeDirection = RIGHT;
+        snakeDirection = Direction.RIGHT;
         directionSet = false;
         timer = MOVE_TIME;
         snakeX = 0;
