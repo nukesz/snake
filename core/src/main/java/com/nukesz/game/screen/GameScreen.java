@@ -14,46 +14,40 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.nukesz.game.BodyPart;
-import com.nukesz.game.SnakeGame;
-import com.nukesz.game.State;
-import com.nukesz.game.Wall;
+import com.nukesz.game.*;
 
 import java.awt.*;
 
 public class GameScreen extends AbstractGameScreen {
 
-    private static final float WORLD_WIDTH = 640;
-    private static final float WORLD_HEIGHT = 480;
+    private static final int BOARD_WIDTH = 640;
+    private static final int BOARD_HEIGHT = 480;
+    private static final int GRID_CELL = 32;
+    private static final int WORLD_WIDTH = BOARD_WIDTH + 2 * GRID_CELL;
+    private static final int WORLD_HEIGHT = BOARD_HEIGHT + 2 * GRID_CELL;
+
     private static final String GAME_OVER_TEXT = "Game Over... Tap space to restart!";
     private static final String GAME_START_TEXT = "Welcome to the SNAKE game! Tap space to start!";
     private static final int POINTS_PER_APPLE = 10;
 
-    private static final int RIGHT = 0;
-    private static final int LEFT = 1;
-    private static final int UP = 2;
-    private static final int DOWN = 3;
+
     private static final float MOVE_TIME = 0.2F;
     private static final int SNAKE_MOVEMENT = 32;
-    private static final int GRID_CELL = 32;
-    private int snakeDirection = UP;
+    Apple appleObj;
+    OnscreenControlRenderer controlRenderer;
+    private Direction snakeDirection = Direction.UP;
     private Viewport viewport;
     private Camera camera;
     private float timer = MOVE_TIME;
     private int snakeX = 0;
     private int snakeY = 0;
-
     private SpriteBatch batch;
     private ShapeRenderer shapeRenderer;
     private BitmapFont bitmapFont;
     private GlyphLayout layout = new GlyphLayout();
     private Texture snakeHead;
     private Texture snakeBody;
-    private Texture apple;
     private Texture wall;
-    private boolean appleAvailable = false;
-    private int appleX;
-    private int appleY;
     private Array<BodyPart> bodyParts = new Array<>();
     private int snakeXBeforeUpdate;
     private int snakeYBeforeUpdate;
@@ -61,13 +55,19 @@ public class GameScreen extends AbstractGameScreen {
     private State state = State.INITIAL;
     private int score = 0;
     private Array<Wall> walls;
+    private boolean isSideControllerNeeded = true;
+    private InputHandler inputHandler;
 
     public GameScreen(SnakeGame game) {
         super(game);
+        if (isSideControllerNeeded) {
+            controlRenderer = new OnscreenControlRenderer();
+        }
     }
 
     @Override
     public void show() {
+        Gdx.graphics.setWindowedMode(WORLD_WIDTH, WORLD_HEIGHT);
         camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.position.set(WORLD_WIDTH / 2, WORLD_HEIGHT / 2, 0);
         //camera.update();
@@ -78,12 +78,13 @@ public class GameScreen extends AbstractGameScreen {
         bitmapFont = new BitmapFont();
         snakeHead = new Texture(Gdx.files.internal("snakehead_resized.png"));
         snakeBody = new Texture(Gdx.files.internal("snakebody.png"));
-        apple = new Texture(Gdx.files.internal("apple.png"));
+        appleObj = new Apple(0, 0, new Texture(Gdx.files.internal("apple.png")));
         wall = new Texture(Gdx.files.internal("wall.png"));
         walls = new Array<>();
         for (int i = 4 * GRID_CELL; i < 10 * GRID_CELL; i += GRID_CELL) {
             walls.add(new Wall(wall, i, 10 * GRID_CELL));
         }
+        inputHandler = new InputHandler(WORLD_WIDTH, WORLD_HEIGHT);
     }
 
     @Override
@@ -110,8 +111,9 @@ public class GameScreen extends AbstractGameScreen {
                 break;
         }
         clearScreen();
-        //drawGrid();
+        //    drawGrid();
         draw();
+        controlRenderer.render();
     }
 
     private void updateSnake(float delta) {
@@ -149,8 +151,8 @@ public class GameScreen extends AbstractGameScreen {
         for (Wall wall : walls) {
             wall.draw(batch);
         }
-        if (appleAvailable) {
-            batch.draw(apple, appleX, appleY);
+        if (appleObj.isAppleAvailable) {
+            batch.draw(appleObj.texture, appleObj.x, appleObj.y);
         }
         printState(state);
         drawScore();
@@ -180,12 +182,12 @@ public class GameScreen extends AbstractGameScreen {
     }
 
     private void checkAppleCollision() {
-        if (appleAvailable && appleX == snakeX && appleY == snakeY) {
+        if (appleObj.isAppleAvailable && appleObj.x == snakeX && appleObj.y == snakeY) {
             BodyPart bodyPart = new BodyPart(snakeBody);
             bodyPart.updateBodyPosition(snakeX, snakeY);
             bodyParts.insert(0, bodyPart);
             addToScore();
-            appleAvailable = false;
+            appleObj.isAppleAvailable = false;
         }
     }
 
@@ -199,29 +201,31 @@ public class GameScreen extends AbstractGameScreen {
     }
 
     private void checkAndPlaceApple() {
-        if (!appleAvailable) {
+        if (!appleObj.isAppleAvailable) {
             do {
-                appleX = MathUtils.random((int) viewport.getWorldWidth()
-                        / SNAKE_MOVEMENT - 1) * SNAKE_MOVEMENT;
-                appleY = MathUtils.random((int) viewport.getWorldHeight()
-                        / SNAKE_MOVEMENT - 1) * SNAKE_MOVEMENT;
-                appleAvailable = true;
-            } while (appleX == snakeX && appleY == snakeY);
+                appleObj.x = MathUtils.random((int) (BOARD_WIDTH)
+                        / SNAKE_MOVEMENT - 1) * SNAKE_MOVEMENT + GRID_CELL;
+
+                appleObj.y = MathUtils.random((int) (BOARD_HEIGHT)
+                        / SNAKE_MOVEMENT - 1) * SNAKE_MOVEMENT + GRID_CELL;
+                appleObj.isAppleAvailable = true;
+
+            } while (appleObj.x == snakeX && appleObj.y == snakeY);
         }
     }
 
     private void checkForOutOfBounds() {
-        if (snakeX >= viewport.getWorldWidth()) {
-            snakeX = 0;
+        if (snakeX >= BOARD_WIDTH + GRID_CELL) {
+            snakeX = GRID_CELL;
         }
-        if (snakeX < 0) {
-            snakeX = (int) viewport.getWorldWidth() - SNAKE_MOVEMENT;
+        if (snakeX < GRID_CELL) {
+            snakeX = (int) viewport.getWorldWidth() - GRID_CELL;
         }
-        if (snakeY >= viewport.getWorldHeight()) {
-            snakeY = 0;
+        if (snakeY >= BOARD_HEIGHT + GRID_CELL) {
+            snakeY = GRID_CELL;
         }
-        if (snakeY < 0) {
-            snakeY = (int) viewport.getWorldHeight() - SNAKE_MOVEMENT;
+        if (snakeY < GRID_CELL) {
+            snakeY = (int) viewport.getWorldHeight() - GRID_CELL;
         }
     }
 
@@ -250,33 +254,39 @@ public class GameScreen extends AbstractGameScreen {
         boolean uPressed = Gdx.input.isKeyPressed(Input.Keys.UP) || Gdx.input.isKeyPressed(Input.Keys.W);
         boolean dPressed = Gdx.input.isKeyPressed(Input.Keys.DOWN) || Gdx.input.isKeyPressed(Input.Keys.S);
 
-        if (lPressed) updateDirection(LEFT);
-        if (rPressed) updateDirection(RIGHT);
-        if (uPressed) updateDirection(UP);
-        if (dPressed) updateDirection(DOWN);
+        Direction way= inputHandler.handleMouseClick(camera);
+        if (way!=Direction.NONE){
+            updateDirection(way);
+        }
+        if (lPressed) updateDirection(Direction.LEFT);
+        if (rPressed) updateDirection(Direction.RIGHT);
+        if (uPressed) updateDirection(Direction.UP);
+        if (dPressed) updateDirection(Direction.DOWN);
+
+
     }
 
-    private void updateIfNotOppositeDirection(int newSnakeDirection, int oppositeDirection) {
+    private void updateIfNotOppositeDirection(Direction newSnakeDirection, Direction oppositeDirection) {
         if (snakeDirection != oppositeDirection || bodyParts.size == 0) {
             snakeDirection = newSnakeDirection;
         }
     }
 
-    private void updateDirection(int newSnakeDirection) {
+    private void updateDirection(Direction newSnakeDirection) {
         if (!directionSet && snakeDirection != newSnakeDirection) {
             directionSet = true;
             switch (newSnakeDirection) {
                 case LEFT:
-                    updateIfNotOppositeDirection(newSnakeDirection, RIGHT);
+                    updateIfNotOppositeDirection(newSnakeDirection, Direction.RIGHT);
                     break;
                 case RIGHT:
-                    updateIfNotOppositeDirection(newSnakeDirection, LEFT);
+                    updateIfNotOppositeDirection(newSnakeDirection, Direction.LEFT);
                     break;
                 case UP:
-                    updateIfNotOppositeDirection(newSnakeDirection, DOWN);
+                    updateIfNotOppositeDirection(newSnakeDirection, Direction.DOWN);
                     break;
                 case DOWN:
-                    updateIfNotOppositeDirection(newSnakeDirection, UP);
+                    updateIfNotOppositeDirection(newSnakeDirection, Direction.UP);
                     break;
             }
         }
@@ -286,11 +296,13 @@ public class GameScreen extends AbstractGameScreen {
         for (BodyPart bodyPart : bodyParts) {
             if (bodyPart.x == snakeX && bodyPart.y == snakeY) {
                 state = State.GAME_OVER;
+                return;
             }
         }
         for (Wall wall : walls) {
             if (wall.x == snakeX && wall.y == snakeY) {
                 state = State.GAME_OVER;
+                return;
             }
         }
     }
@@ -304,14 +316,14 @@ public class GameScreen extends AbstractGameScreen {
     private void doInit() {
         state = State.PLAYING;
         bodyParts.clear();
-        snakeDirection = RIGHT;
+        snakeDirection = Direction.RIGHT;
         directionSet = false;
         timer = MOVE_TIME;
         snakeX = 0;
         snakeY = 0;
         snakeXBeforeUpdate = 0;
         snakeYBeforeUpdate = 0;
-        appleAvailable = false;
+        appleObj.isAppleAvailable = false;
         score = 0;
     }
 
